@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <script src="http://localhost/FrontEnd/Vue/assets/js/vue.js"></script>
+    <script src="../dist/webpack/vuex.js"></script>
+  </head>
+  <body>
+    <div id="app">
+      <p>{{$store.state.age}}</p>
+      <button @click="dispatchA(1)">mutation a</button>
+    </div>
+    <script>
+      const store = new Vuex.Store({
+        strict: true,
+        state: {
+          age: 10,
+        },
+        mutations: {
+          mutationA(state, payload) {
+            state.age += payload;
+          },
+          mutationB(state, payload) {
+            state.age *= payload;
+          },
+        },
+        actions: {
+          actionA(context, payload) {
+            return new Promise((resolve, reject) =>
+              setTimeout(() => {
+                resolve(999);
+              }, 2000)
+            );
+          },
+
+          async actionB(context, payload) {
+            let res = await context.dispatch("actionA");
+            return "hello " + res;
+          },
+        },
+        modules: {
+          module_a: {
+            actions: {
+              actionA(context, payload) {
+                return 888;
+              },
+            },
+          },
+        },
+      });
+      const vm = new Vue({
+        el: "#app",
+        store,
+        methods: {
+          dispatchA(payload) {
+            this.$store
+              .dispatch("actionB", payload)
+              .then(console.log)
+              .catch((err) => console.log("err", err));
+          },
+        },
+      });
+    </script>
+  </body>
+</html>

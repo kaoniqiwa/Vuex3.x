@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <script src="http://localhost/FrontEnd/Vue/assets/js/vue.js"></script>
+    <script src="../dist/webpack/vuex.js"></script>
+  </head>
+  <body>
+    <div id="app">
+      <p>{{doneTodosCount}}</p>
+      <p>{{doneCount}}</p>
+      <p>{{getCount}}</p>
+      <p>{{getSalary}}</p>
+      <p>{{salary}}</p>
+    </div>
+    <script>
+      const mapGetters = Vuex.mapGetters;
+
+      const store = new Vuex.Store({
+        strict: true,
+        state: {
+          list: [
+            {
+              id: 1,
+              text: "hello",
+              done: true,
+            },
+            {
+              id: 2,
+              text: "world",
+              done: false,
+            },
+          ],
+        },
+        getters: {
+          doneTodosCount(state) {
+            return state.list.reduce((count, cur) => {
+              if (cur.done) count++;
+              return count;
+            }, 0);
+          },
+        },
+        modules: {
+          module_a: {
+            namespaced: true,
+            state: {
+              name: "module_a",
+              count: 1,
+            },
+            getters: {
+              getCount(state) {
+                return state.count;
+              },
+            },
+            modules: {
+              module_b: {
+                namespaced: true,
+                state: {
+                  name: "module_b",
+                  salary: 1000,
+                },
+                getters: {
+                  getSalary(state) {
+                    return state.salary;
+                  },
+                },
+              },
+            },
+          },
+        },
+      });
+      const vm = new Vue({
+        el: "#app",
+        store,
+        computed: {
+          ...mapGetters(["doneTodosCount"]),
+          ...mapGetters({
+            doneCount: "doneTodosCount",
+          }),
+          ...mapGetters("module_a", ["getCount"]),
+          ...mapGetters("module_a/module_b", ["getSalary"]),
+          ...mapGetters("module_a/module_b", {
+            salary: "getSalary",
+          }),
+        },
+      });
+    </script>
+  </body>
+</html>

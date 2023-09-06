@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <script src="http://localhost/FrontEnd/Vue/assets/js/vue.js"></script>
+    <script src="../dist/webpack/vuex.js"></script>
+  </head>
+  <body>
+    <div id="app">
+      <button @click="$store.commit('module_a/commitAge',5)">
+        同步更新状态
+      </button>
+      <button @click="$store.dispatch('module_a/dispatchAge',5)">
+        异步更新状态
+      </button>
+      <button @click="$store.dispatch('globalAction')">
+        触发子命名空间中的全局 Action
+      </button>
+    </div>
+    <script>
+      const store = new Vuex.Store({
+        strict: true,
+        /**
+         * 最顶层的 {state,getters,mutations,actions} 为根模块
+         */
+        state() {
+          return {
+            name: "root",
+            age: 10,
+          };
+        },
+        getters: {
+          getAge: (state) => {
+            return state.age + 18;
+          },
+        },
+        mutations: {
+          commitAge(state, payload) {
+            console.log("module_root commitAge");
+          },
+        },
+        actions: {
+          dispatchAge({ commit }) {
+            console.log("module_root dispatchAge");
+          },
+        },
+        modules: {
+          module_a: {
+            namespaced: true,
+            state: {
+              name: "module_a",
+              count: 1,
+            },
+            getters: {
+              getCount(state, getters, rootState, rootGetters) {
+                return state.count * 10;
+              },
+            },
+            mutations: {
+              commitAge(state, payload) {
+                console.log("module_a commitAge");
+              },
+            },
+            actions: {
+              dispatchAge(context) {
+                // context.dispatch("dispatchAge", null, { root: true });
+                context.commit("commitAge", null, { root: true });
+                // context.commit("commitAge");
+
+                console.log("module_a dispatchAge");
+              },
+              dispatchCount(context) {
+                console.log("module_a dispatchCount");
+              },
+              globalAction: {
+                root: true,
+                handler(context) {
+                  console.log(context);
+                  console.log("hello");
+                },
+              },
+            },
+          },
+        },
+      });
+      const vm = new Vue({
+        el: "#app",
+        store,
+      });
+    </script>
+  </body>
+</html>

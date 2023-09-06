@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <script src="http://localhost/FrontEnd/Vue/assets/js/vue.js"></script>
+    <script src="../dist/webpack/vuex.js"></script>
+  </head>
+  <body>
+    <div id="app">
+      <p>{{$store.state.module_a.msg}}</p>
+      <button @click="$store.commit('module_a/changeMsg',5)">
+        同步更新状态
+      </button>
+    </div>
+    <script>
+      const store = new Vuex.Store({
+        state: {
+          age: 10,
+          module_a: 100,
+        },
+      });
+
+      /** 注册嵌套模块时,父模块应该存在 */
+      store.registerModule(
+        ["module_a"],
+        {
+          namespaced: true,
+          state: {
+            name: "module_a",
+            msg: "hello",
+          },
+          mutations: {
+            changeMsg(state) {
+              state.msg = "world";
+            },
+          },
+        },
+        {
+          preserveState: true,
+        }
+      );
+      // store.registerModule(["module_a", "module_b"], {
+      //   state: {
+      //     name: "module_b",
+      //   },
+      // });
+      // store.registerModule(["module_a", "module_b", "module_c"], {
+      //   state: {
+      //     name: "module_c",
+      //   },
+      // });
+      const vm = new Vue({
+        el: "#app",
+        store,
+      });
+    </script>
+  </body>
+</html>

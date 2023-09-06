@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <script src="http://localhost/FrontEnd/Vue/assets/js/vue.js"></script>
+    <script src="../dist/webpack/vuex.js"></script>
+  </head>
+  <body>
+    <div id="app">
+      <p>Count: {{$store.state.count}}</p>
+      <button @click="addCount(2)">add</button>
+      <button @click="changeCount(2)">changeCount</button>
+      <button @click="increment(2)">increment</button>
+      <button @click="decrement(2)">decrement</button>
+
+      <hr />
+      <button @click="changeGlobalCount(2,{root:true})">changeCount</button>
+      <button @click="commitCount(2)">commitCount</button>
+      <button @click="commitSalary(2)">commitSalary</button>
+      <button @click="changeSalary(2)">changeSalary</button>
+    </div>
+    <script>
+      const mapMutations = Vuex.mapMutations;
+
+      const store = new Vuex.Store({
+        strict: true,
+        state: {
+          count: 1,
+        },
+        mutations: {
+          changeCount(state, payload) {
+            console.log("root mutation");
+
+            state.count += payload;
+          },
+        },
+        modules: {
+          module_a: {
+            namespaced: true,
+            state: {
+              name: "module_a",
+              count: 1,
+            },
+            mutations: {
+              commitCount(state, payload) {
+                console.log("mutate moudule_a", state, payload);
+              },
+            },
+
+            modules: {
+              module_b: {
+                namespaced: true,
+                state: {
+                  name: "module_b",
+                  salary: 1000,
+                },
+                mutations: {
+                  commitSalary(state, payload) {
+                    console.log("mutate moudule_b", state, payload);
+                  },
+                },
+              },
+            },
+          },
+        },
+      });
+      const vm = new Vue({
+        el: "#app",
+        store,
+        methods: {
+          addCount(payload) {
+            // this.$store.commit("changeCount", payload);
+            // this.$store.commit("changeCount", {
+            //   amount: payload,
+            // });
+            // this.$store.commit({
+            //   type: "changeCount",
+            //   amount: payload,
+            // });
+          },
+          ...mapMutations(["changeCount"]),
+          ...mapMutations({
+            increment: "changeCount",
+          }),
+          ...mapMutations({
+            decrement: function (commit, payload) {
+              console.log(this); // vue 实例
+              commit("changeCount", payload);
+            },
+          }),
+          ...mapMutations("module_a", {
+            changeGlobalCount: "changeCount",
+          }),
+          ...mapMutations("module_a", ["commitCount"]),
+          ...mapMutations("module_a/module_b", ["commitSalary"]),
+          ...mapMutations("module_a/module_b", {
+            changeSalary: function (commit, payload) {
+              commit("commitSalary", payload);
+            },
+          }),
+        },
+      });
+    </script>
+  </body>
+</html>

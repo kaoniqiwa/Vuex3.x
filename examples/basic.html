@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <script src="http://localhost/FrontEnd/Vue/assets/js/vue.js"></script>
+    <script src="../dist/webpack/vuex.js"></script>
+  </head>
+  <body>
+    <div id="app">
+      <p>珠峰年龄: {{$store.state.age}}</p>
+
+      <p>我的年龄: {{$store.getters.getAge}}</p>
+
+      <button @click="$store.commit('changeAge',5)">同步更新状态</button>
+      <button @click="$store.dispatch('changeAge',5)">异步更新状态</button>
+      <button @click="$store.commit('addCount')">添加新属性</button>
+      <p>Count属性: {{$store.state.count}}</p>
+    </div>
+    <script>
+      const store = new Vuex.Store({
+        strict: true,
+        // state: {
+        //   age: 10,
+        // },
+        state() {
+          return {
+            age: 10,
+          };
+        },
+        getters: {
+          /**
+           * getters 内部调用形式为
+           *  rawGetter(local.state,local.getters,store.state,store.getters)
+           *  this 指向 undefined 或者 window
+           *
+           *  在同一个命名空间，不能有相同的 getters
+           */
+          getAge: (state) => {
+            return state.age + 18;
+          },
+        },
+        mutations: {
+          /* handler.call(store,local.state, payload), this 指向 store */
+          changeAge(state, payload) {
+            state.age += payload;
+          },
+          addCount(state) {
+            /** 添加新属性为响应式 */
+            Vue.set(state, "count", 100);
+          },
+        },
+        actions: {
+          /** handler.call(store,
+           * {
+           *    dispatch: local.dispatch,
+           *    commit: local.commit,
+           *    getters: local.getters,
+           *    state: local.state,
+           *    rootGetters: store.getters,
+           *    rootState: store.state
+           *  },
+           *  payload),
+           *
+           * this 指向 store */
+          changeAge({ commit }) {
+            console.log(this);
+            setTimeout(() => {
+              /***
+               * 在异步回调中，commit 中的 this 理应指向 undefined 或者 window, 但是 vuex 内部作了处理
+               * this.commit = function boundCommit(){ return commit.call(store,...)}
+               * 所以 commit 中 this 不会丢失
+               */
+              commit("changeAge", 10);
+            }, 1000);
+          },
+        },
+      });
+      const vm = new Vue({
+        el: "#app",
+        store,
+      });
+    </script>
+  </body>
+</html>

@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <script src="http://localhost/FrontEnd/Vue/assets/js/vue.js"></script>
+    <script src="../dist/webpack/vuex.js"></script>
+  </head>
+  <body>
+    <div id="app">
+      <p>Count: {{$store.state.count}}</p>
+      <button @click="addCount(2)">add</button>
+      <button @click="dispatchCount(2)">dispatchCount</button>
+      <button @click="increment(2)">increment</button>
+      <button @click="decrement(2)">decrement</button>
+
+      <hr />
+      <button @click="changeGlobalCount(2,{root:true})">changeCount</button>
+
+      <button @click="dispatchName(2)">dispatchName</button>
+      <button @click="dispatchSalary(2)">dispatchSalary</button>
+      <button @click="changSalary(2)">changSalary</button>
+    </div>
+    <script>
+      const mapActions = Vuex.mapActions;
+      const store = new Vuex.Store({
+        strict: true,
+        state: {
+          count: 1,
+        },
+        mutations: {
+          changeCount(state, payload) {
+            state.count += payload;
+            // state.count += payload.amount;
+          },
+        },
+        actions: {
+          dispatchCount(context, payload) {
+            console.log("root action");
+          },
+        },
+        modules: {
+          module_a: {
+            namespaced: true,
+            state: {
+              name: "module_a",
+              count: 1,
+            },
+            actions: {
+              dispatchName(context, payload) {
+                console.log("mutate moudule_a", context, payload);
+              },
+            },
+
+            modules: {
+              module_b: {
+                namespaced: true,
+                state: {
+                  name: "module_b",
+                  salary: 1000,
+                },
+                actions: {
+                  dispatchSalary(context, payload) {
+                    console.log("mutate moudule_b", context, payload);
+                  },
+                },
+              },
+            },
+          },
+        },
+      });
+      const vm = new Vue({
+        el: "#app",
+        store,
+        methods: {
+          addCount(payload) {
+            this.$store.dispatch("dispatchCount", payload);
+            // this.$store.dispatch("dispatchCount", {
+            //   amount: payload,
+            // });
+            // this.$store.dispatch({
+            //   type: "dispatchCount",
+            //   amount: payload,
+            // });
+          },
+          ...mapActions(["dispatchCount"]),
+          ...mapActions({
+            increment: "dispatchCount",
+          }),
+          ...mapActions({
+            decrement: function (dispatch, payload) {
+              dispatch("dispatchCount", payload);
+            },
+          }),
+          ...mapActions("module_a", {
+            changeGlobalCount: "dispatchCount",
+          }),
+          ...mapActions("module_a", ["dispatchName"]),
+          ...mapActions("module_a/module_b", ["dispatchSalary"]),
+          ...mapActions("module_a/module_b", {
+            changSalary(dispatch) {
+              dispatch("dispatchCount", null, { root: true });
+            },
+          }),
+        },
+      });
+    </script>
+  </body>
+</html>

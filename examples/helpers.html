@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <script src="http://localhost/FrontEnd/Vue/assets/js/vue.js"></script>
+    <script src="../dist/webpack/vuex.js"></script>
+  </head>
+  <body>
+    <div id="app">
+      <div>
+        <p>{{first}}</p>
+        <p>{{lastName}}</p>
+        <p>{{full}}</p>
+        <p>{{firstNameAlias}}</p>
+      </div>
+
+      <hr />
+      <div>{{name}}</div>
+      <div>{{count}}</div>
+    </div>
+    <script>
+      const mapState = Vuex.mapState;
+      const store = new Vuex.Store({
+        strict: true,
+        state: {
+          firstName: "Jim",
+          lastName: "Green",
+        },
+        modules: {
+          module_a: {
+            namespaced: true,
+            state: {
+              name: "module_a",
+              count: 1,
+            },
+            getters: {
+              getCount() {},
+            },
+            modules: {
+              module_b: {
+                namespaced: true,
+                state: {
+                  name: "module_b",
+                },
+              },
+            },
+          },
+        },
+      });
+      const vm = new Vue({
+        el: "#app",
+        store,
+        computed: {
+          ...mapState({
+            /** firstNameAlias 是计算属性的名称，vm 实例使用，属性值从 state['firstName'] 中获取 */
+            firstNameAlias: "firstName",
+            first: (state, getters) => state.firstName,
+            full: function (state) {
+              // 常规函数中 this  指向 vue 实例
+              return state.firstName + ":" + state.lastName;
+            },
+          }),
+          ...mapState(["lastName"]),
+          ...mapState("module_a/module_b", ["name"]),
+          ...mapState("module_a", {
+            count: (state, getters) => {
+              console.log(getters);
+              return state.count;
+            },
+          }),
+        },
+      });
+    </script>
+  </body>
+</html>

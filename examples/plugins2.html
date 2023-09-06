@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <script src="http://localhost/FrontEnd/Vue/assets/js/vue.js"></script>
+    <script src="../dist/webpack/vuex.js"></script>
+  </head>
+  <body>
+    <div id="app">
+      <p>珠峰年龄: {{$store.state.age}}</p>
+      <p>我的年龄: {{$store.getters.getAge}}</p>
+
+      <button @click="$store.commit('module_a/changeMsg',11)">
+        同步更新状态
+      </button>
+      <button @click="$store.dispatch('dispatchAge',10)">异步更新状态</button>
+    </div>
+    <script>
+      const myPluginWithSnapshot = (store) => {
+        let unsub1 = store.subscribeAction(function action1(action, state) {
+          console.log(action, state.age);
+          ubsub2();
+        });
+        let ubsub2 = store.subscribeAction(function action2(action, state) {
+          console.log(action, state.age);
+        });
+
+        // new Promise((resolve) => {
+        //   setTimeout(function () {
+        //     resolve(1000);
+        //   }, 1000);
+        // }).then((res) => {
+        //   store.dispatch("dispatchAge", res);
+        // });
+      };
+      const store = new Vuex.Store({
+        strict: true,
+        plugins: [myPluginWithSnapshot],
+        state: {
+          age: 10,
+        },
+        getters: {
+          getAge: (state) => {
+            return state.age * 2;
+          },
+        },
+        mutations: {
+          changeAge(state, payload) {
+            state.age += payload;
+          },
+          initAge(state, payload) {
+            state.age = payload;
+          },
+        },
+        actions: {
+          dispatchAge({ commit }, payload) {
+            // return new Promise((resolve) => {
+            //   setTimeout(() => {
+            //     resolve();
+            //     commit("changeAge", payload);
+            //   }, 1000);
+            // });
+            console.log("root action", payload);
+          },
+        },
+        modules: {
+          module_a: {
+            namespaced: true,
+            state: {
+              msg: "hello",
+            },
+            mutations: {
+              changeMsg() {
+                console.log("module_a mutation");
+              },
+            },
+          },
+        },
+      });
+      const vm = new Vue({
+        el: "#app",
+        store,
+      });
+    </script>
+  </body>
+</html>

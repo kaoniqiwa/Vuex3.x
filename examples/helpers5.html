@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <script src="http://localhost/FrontEnd/Vue/assets/js/vue.js"></script>
+    <script src="../dist/webpack/vuex.js"></script>
+  </head>
+  <body>
+    <div id="app">
+      <p>{{salary}}</p>
+      <!-- <p>{{fullName}}</p> -->
+
+      <!-- <button @click="commitSalary">commit</button> -->
+      <!-- <button @click="dispatchSalary">dispatch</button> -->
+    </div>
+    <script>
+      const createNamespacedHelpers = Vuex.createNamespacedHelpers;
+      const { mapState, mapGetters, mapMutations, mapActions } =
+        createNamespacedHelpers("module_a/module_b");
+      const store = new Vuex.Store({
+        strict: true,
+        state: {
+          count: 1,
+        },
+
+        modules: {
+          module_a: {
+            namespaced: true,
+            state: {
+              name: "module_a",
+              count: 1,
+            },
+            actions: {
+              dispatchName(context, payload) {
+                console.log("mutate moudule_a", context, payload);
+              },
+            },
+            modules: {
+              module_b: {
+                namespaced: true,
+                state: {
+                  name: "module_b",
+                  salary: 1000,
+                },
+                getters: {
+                  fullName(state) {
+                    return "Jim Green";
+                  },
+                },
+
+                mutations: {
+                  commitSalary() {
+                    console.log("module_b mutations");
+                  },
+                },
+                actions: {
+                  dispatchSalary() {
+                    console.log("module_b actions");
+                  },
+                },
+              },
+            },
+          },
+        },
+      });
+      const vm = new Vue({
+        el: "#app",
+        store,
+        computed: {
+          ...mapState(["salary"]),
+          // ...mapGetters(["fullName"]),
+        },
+        // methods: {
+        //   ...mapMutations(["commitSalary"]),
+        //   ...mapActions(["dispatchSalary"]),
+        // },
+      });
+    </script>
+  </body>
+</html>

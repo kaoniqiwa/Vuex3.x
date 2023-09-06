@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <script src="http://localhost/FrontEnd/Vue/assets/js/vue.js"></script>
+    <script src="../dist/webpack/vuex.js"></script>
+  </head>
+  <body>
+    <div id="app">
+      <p>珠峰年龄: {{$store.state.age}}</p>
+      <p>我的年龄: {{$store.getters.getAge}}</p>
+
+      <button @click="$store.commit('changeAge',1)">同步更新状态</button>
+      <button @click="$store.dispatch('changeAge',10)">异步更新状态</button>
+    </div>
+    <script>
+      const createSerialize = Vuex.createSerialize;
+      const store = new Vuex.Store({
+        strict: true,
+        plugins: [createSerialize()],
+        state: {
+          age: 10,
+        },
+        getters: {
+          getAge: (state) => {
+            return state.age * 2;
+          },
+        },
+        mutations: {
+          changeAge(state, payload) {
+            state.age += payload;
+          },
+          initAge(state, payload) {
+            state.age = payload;
+          },
+        },
+        actions: {
+          changeAge({ commit }, payload) {
+            setTimeout(() => {
+              commit("changeAge", payload);
+            }, 1000);
+          },
+        },
+      });
+      const vm = new Vue({
+        el: "#app",
+        store,
+      });
+    </script>
+  </body>
+</html>
