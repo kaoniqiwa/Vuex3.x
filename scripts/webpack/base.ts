@@ -1,6 +1,7 @@
 import Config from "webpack-chain";
 import path from "path";
 import { DefinePlugin } from "webpack";
+import HtmlWebpackPlugin from "html-webpack-plugin";
 
 function resolve(dir: string) {
   return path.resolve(__dirname, "../", dir);

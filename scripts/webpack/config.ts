@@ -1,6 +1,7 @@
 import { merge } from "webpack-merge";
 import { Configuration } from "webpack";
 import path from "path";
+import "webpack-dev-server";
 
 function resolve(dir: string) {
   return path.resolve(process.cwd(), dir);
